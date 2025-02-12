@@ -1,9 +1,9 @@
 <?php
 
-    $servidor = "sql100.infinityfree.com";
-    $usuario = "if0_37486748";
-    $clave = "fkCjc5u7IzDoL";
-    $basededatos = "if0_37486748_ach";
+    $servidor = "localhost";
+    $usuario = "root";
+    $clave = "";
+    $basededatos = "ach";
 
     $conexion = mysqli_connect($servidor, $usuario, $clave, $basededatos)
 
