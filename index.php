@@ -1,154 +1,193 @@
 <?php
 
-$servidor = "localhost";
-$usuario = "root";
-$clave = "";
-$basededatos = "ach";
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  $servidor = "localhost";
+  $usuario = "root";
+  $clave = "";
+  $basededatos = "ach";
 
-$enlace = mysqli_connect($servidor, $usuario, $clave, $basededatos)
+  // Create connection
+  $conn = new mysqli($servidor, $usuario, $clave, $basededatos);
+
+  // Check connection
+  if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+  }
+
+  // Sanitizar y obtener datos del formulario
+  $fecha = filter_input(INPUT_POST, 'fecha');
+  $country = filter_input(INPUT_POST, 'country');
+  $sector = filter_input(INPUT_POST, 'sector');
+  $company = filter_input(INPUT_POST, 'company');
+  $role = filter_input(INPUT_POST, 'role');
+  $gender = filter_input(INPUT_POST, 'gender');
+  $education = filter_input(INPUT_POST, 'education');
+  $age = filter_input(INPUT_POST, 'age');
+
+  // Preparar y ejecutar query
+  $stmt = $conn->prepare("INSERT INTO home 
+            (fecha, country, sector, company, role, gender, education, age) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+
+  $stmt->bind_param(
+    "ssssssss",
+    $fecha,
+    $country,
+    $sector,
+    $company,
+    $role,
+    $gender,
+    $education,
+    $age
+  );
+
+  if ($stmt->execute()) {
+    header("Location: criterios.php");
+    exit();
+  } else {
+    echo "<p class='error'>Error al guardar los datos: " . $conn->error . "</p>";
+  }
+
+  $stmt->close();
+  $conn->close();
+}
 
 ?>
 
 <!DOCTYPE html>
+<html lang="en">
 <html>
 
 <head>
   <meta charset="utf-8">
-  <title> Form ACH </title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      margin: 0 auto;
-      padding: 20px;
-
-    }
-
-    h1,
-    h2,
-    h3 {
-      color: #333;
-    }
-
-    form {
-      background-color: #f4f4f4;
-      border-radius: 5px;
-      padding: 20px;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PESTEL analysis and Porter strategies evaluation form">
+  <title> PESTEL & Porter Strategy Evaluation Form </title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-  <img src="Logo_TdeA.jpg" />
-  <h1>PESTEL analysis and Porter strategies</h1>
-  <h2>Evaluation of Criteria, subcriteria and strategies for <span class='var'>Strategic Selection</span></h2>
-  <h3>Instructions for Completing the Survey with the Saaty Scale</h3>
-  <p>The following survey aims to compare the relative importance of different criteria or factors. We use a scale from 1 to 9 to evaluate these comparisons. Below is a description of how to use this scale:<br>
-    1: Both criteria are equally important.<br>
-    3: The first criterion is slightly more important than the second criterion.<br>
-    5: The first criterion is clearly more important than the second criterion.<br>
-    7: The first criterion is much more important than the second criterion.<br>
-    9: The first criterion is extremely more important than the second criterion.<br>
-    2, 4, 6, 8: These are intermediate values used when the importance lies between two adjacent levels.<br>
+  <header class="header">
+    <div class="logo-container">
+      <img src="Logo_TdeA.jpg" alt="Logo Tecnológico de Antioquia Institución Universitaria Logo">
+    </div>
+    <div class="header-content">
+      <h1>PESTEL analysis and Porter strategies</h1>
+      <h2>Evaluation of Criteria, subcriteria and strategies for <span class="highlight">Strategic Selection</span></h2>
+    </div>
+  </header>
 
-    For each pair of criteria, please select the number that best represents the relative importance of the first criterion compared to the second criterion. If you consider the second criterion to be more important, select it.<br>
-  <h3>Example</h3> If you are comparing "Political Criteria" and "Economic Criteria" and you consider "Political Criteria" to be much more important than "Economic Criteria", you would select "Political Criteria" and then comparing "Political Criteria" as the first criterion and "Economic Criteria" as the second criterion. Conversely, if you believe that "Economic Criteria" are more important than "Political Criteria", you would select "Economic Criteria" and then comparing "Economic Criteria" as the first criterion and "Political Criteria" as the second criterion.<br>
-  Remember that all comparisons should be consistent and reflect your expert judgment on the importance of the criteria in relation to the others.
-  </p>
+  <main class="container">
+    <section class="instructions">
+      <h3>Instructions for Completing the Survey with the Saaty Scale</h3>
+      <p>The following survey aims to compare the relative importance of different criteria or factors. We use a scale from 1 to 9 to evaluate these comparisons:</p>
+      <ul class="scale-list">
+        <li><strong>1:</strong> Both criteria are equally important</li>
+        <li><strong>3:</strong> First criterion is slightly more important</li>
+        <li><strong>5:</strong> First criterion is clearly more important</li>
+        <li><strong>7:</strong> First criterion is much more important</li>
+        <li><strong>9:</strong> First criterion is extremely more important</li>
+        <li><strong>2, 4, 6, 8:</strong> Intermediate values between adjacent levels</li>
+      </ul>
 
-  <form action="#" name="form" method="post">
-
-    <label> Date </label>
-    <input type="date" name="date"> <br>
-
-    <label> Country </label>
-    <input type="text" name="country" placeholder="--"> <br>
-
-    <label for="Sector">Economic Sector</label>
-    <select name="sec" id="Sector">
-      <option value="0">Select</option>
-      <option value="1">Commerce</option>
-      <option value="2">Industry</option>
-      <option value="3">Services</option>
-      <option value="3">Construction</option>
-      <option value="3">Transportation</option>
-    </select><br>
-
-    <label> Company </label>
-    <input type="text" name="company" placeholder="--"> <br>
-
-    <label for="role">Position</label>
-    <select name="rol" id="role">
-      <option value="0">Select</option>
-      <option value="1">CEO</option>
-      <option value="2">COO</option>
-      <option value="3">CFO</option>
-      <option value="4">CIO</option>
-      <option value="5">CTO</option>
-      <option value="6">CIO</option>
-      <option value="7">CMO</option>
-      <option value="8">CKO</option>
-      <option value="9">Other</option>
-    </select><br>
-
-    <label for="gender">Gender</label>
-    <select name="gen" id="gender">
-      <option value="0">Select</option>
-      <option value="female">Female</option>
-      <option value="male">Male</option>
-      <option value="other">Other</option>
-    </select><br>
-
-    <label for="educationalLevel">Educational level</label>
-    <select name="edu" id="educationalLevel">
-      <option value="0">Select a level</option>
-      <option value="1">Technical</option>
-      <option value="2">Technological</option>
-      <option value="3">Professional</option>
-      <option value="4">Master</option>
-      <option value="5">Doctorate</option>
-      <option value="6">Other</option> <br>
-    </select><br>
-
-    <label for="ageRange">Age range</label>
-    <select name="age" id="ageRange">
-      <option value="0">Select an age range</option>
-      <option value="1">20 - 30</option>
-      <option value="2">31 - 40</option>
-      <option value="3">41 - 50</option>
-      <option value="4">More than 50</option>
-    </select><br>
-
-    <tr><input type='submit' value='Send' name='pc_submit' /></td>
-      <td colspan='2'>
-      <td class='ca'></td>
-    </tr><br>
-    <a href="criterios.php">Continue</a>
+      <div class="example">
+        <h4>Example</h4>
+        <p>When comparing "Political Criteria" vs "Economic Criteria":</p>
+        <ul>
+          <li>Select "Political Criteria" first if much more important</li>
+          <li>Select "Economic Criteria" first if more important</li>
+        </ul>
+      </div>
+      <p class="note">Note: Maintain consistent comparisons reflecting your expert judgment.</p>
+    </section>
 
 
+    <form class="evaluation-form" action="" method="post">
+      <fieldset>
+        <legend>Participant Information</legend>
+
+        <div class="form-group">
+          <label for="fecha">Date:</label>
+          <input type="date" id="fecha" name="fecha" required>
+        </div>
+
+        <div class="form-group">
+          <label for="country">Country:</label>
+          <input type="text" id="country" name="country" placeholder="Enter country" required>
+        </div>
+
+        <div class="form-group">
+          <label for="sector">Economic Sector:</label>
+          <select id="sector" name="sector" required>
+            <option value="">Select Sector</option>
+            <option value="commerce">Commerce</option>
+            <option value="industry">Industry</option>
+            <option value="services">Services</option>
+            <option value="construction">Construction</option>
+            <option value="transportation">Transportation</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="company">Company:</label>
+          <input type="text" id="company" name="company" placeholder="Enter company name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="role">Position:</label>
+          <select id="role" name="role" required>
+            <option value="">Select Position</option>
+            <option value="ceo">CEO</option>
+            <option value="coo">COO</option>
+            <option value="cfo">CFO</option>
+            <option value="cio">CIO</option>
+            <option value="cto">CTO</option>
+            <option value="cmo">CMO</option>
+            <option value="cko">CKO</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="gender">Gender:</label>
+          <select id="gender" name="gender" required>
+            <option value="">Select Gender</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="education">Educational Level:</label>
+          <select id="education" name="education" required>
+            <option value="">Select Education Level</option>
+            <option value="technical">Technical</option>
+            <option value="technological">Technological</option>
+            <option value="professional">Professional</option>
+            <option value="master">Master</option>
+            <option value="doctorate">Doctorate</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="age">Age Range:</label>
+          <select id="age" name="age" required>
+            <option value="">Select Age Range</option>
+            <option value="20-30">20 - 30</option>
+            <option value="31-40">31 - 40</option>
+            <option value="41-50">41 - 50</option>
+            <option value="50+">More than 50</option>
+          </select>
+        </div>
+      </fieldset>
+
+      <div class="form-actions">
+        <button type="submit" class="submit-btn">Submit Evaluation</button>
+      </div>
+    </form>
+  </main>
 </body>
 
 </html>
-
-<?php
-
-if (isset($_POST['pc_submit'])) {
-  $date = $_POST['date'];
-  $country = $_POST['country'];
-  $economic_Sector = $_POST['sector'];
-  $company = $_POST['company'];
-  $role = $_POST['rol'];
-  $gender = $_POST['gen'];
-  $educationa_level = $_POST['edu'];
-  $age_range = $_POST['age'];
-
-  $insertardatos = "INSERT INTO home VALUES('$date', '$country', '$economic_Sector', '$company', '$role', '$gender', '$educationa_level', '$age_range', '')";
-
-  $ejecutarinsertar = mysqli_query($enlace, $insertardatos);
-}
-
-?>
